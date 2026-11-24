@@ -2,8 +2,7 @@ name: Oracle A1 Always Free VPS Hunter
 
 on:
   schedule:
-    # Conservative polling interval to reduce OCI API throttling.
-    - cron: "*/5 * * * *"
+  - cron: "2-59/5 * * * *"
   workflow_dispatch:
 
 permissions:
