@@ -2,7 +2,8 @@ name: Oracle A1 Always Free VPS Hunter
 
 on:
   schedule:
-  - cron: "2-59/5 * * * *"
+    # Every five minutes, offset from the top of the hour to reduce queue delays.
+    - cron: '3/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -18,6 +19,11 @@ jobs:
     timeout-minutes: 20
 
     steps:
+      - name: Report trigger
+        run: |
+          echo "Workflow event: ${{ github.event_name }}"
+          echo "Scheduled expression: ${{ github.event.schedule || 'manual / non-schedule trigger' }}"
+
       - name: Check out repository
         uses: actions/checkout@v4
 
@@ -36,8 +42,8 @@ jobs:
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
           mkdir -p "$HOME/.oci"
-          printf '%s\n' "$OCI_CONFIG" > "$HOME/.oci/config"
-          printf '%s\n' "$OCI_PRIVATE_KEY" > "$HOME/.oci/oci_api_key.pem"
+          printf '%s\\n' "$OCI_CONFIG" > "$HOME/.oci/config"
+          printf '%s\\n' "$OCI_PRIVATE_KEY" > "$HOME/.oci/oci_api_key.pem"
           chmod 700 "$HOME/.oci"
           chmod 600 "$HOME/.oci/config" "$HOME/.oci/oci_api_key.pem"
 
@@ -45,7 +51,7 @@ jobs:
         env:
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
         run: |
-          python oci_free_vps.py \
-            --confirm-always-free \
-            --ssh-key "$SSH_PUBLIC_KEY" \
+          python oci_free_vps.py \\
+            --confirm-always-free \\
+            --ssh-key "$SSH_PUBLIC_KEY" \\
             --max-attempts 1
